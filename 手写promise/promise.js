@@ -84,13 +84,13 @@ const pro = new MyPromise((resolve) => {
 });
 pro
   .then((res) => {
-    console.log(res);
+    console.log(res); // 123
     return new MyPromise((resolve) => {
       resolve(999);
     });
   })
   .then((res) => {
-    console.log(res);
+    console.log(res); // 999
   });
 
 const pro2 = new Promise((resolve) => {
