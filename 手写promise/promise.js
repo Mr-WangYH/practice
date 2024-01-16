@@ -77,6 +77,50 @@ class MyPromise {
     });
     return returnPromise;
   }
+
+  all(array) {
+    return new MyPromise((resolve, reject) => {
+      if (!Array.isArray(array)) {
+        throw new TypeError('You must pass an array to all.');
+      }
+      const result = [];
+      let count = 0;
+      // 遍历 array 拿到每一条数据
+      array.forEach((promise, index) => {
+        MyPromise.resolve(promise).then(
+          (value) => {
+            result[index] = value;
+            count++;
+            // 判断 result 结果值的长度 和 array参数的长度相等  执行最外面的 resolve 返回 all 结果
+            if (count === array.length) {
+              resolve(result);
+            }
+          },
+          (err) => {
+            reject(err);
+          }
+        );
+      });
+    });
+  }
+
+  race(array) {
+    return new MyPromise((resolve, reject) => {
+      if (!Array.isArray(array)) {
+        throw new TypeError('You must pass an array to all.');
+      }
+      array.forEach((promise) => {
+        MyPromise.resolve(promise).then(
+          (value) => {
+            resolve(value);
+          },
+          (reason) => {
+            reject(reason);
+          }
+        );
+      });
+    });
+  }
 }
 
 const pro = new MyPromise((resolve) => {

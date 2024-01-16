@@ -55,7 +55,7 @@
 // ------------------- 防抖函数 --------------------
 // function debounce(fn,wait){
 //   let timer = null;
-//   return function {
+//   return function() {
 //     if(timer){
 //       clearTimeout(timer);
 //       timer = null
@@ -70,7 +70,7 @@
 // ----------------- 节流函数 -----------------
 // function throttle(fn,wait){
 //   let timer = null;
-//   return function {
+//   return function() {
 //     if(timer) return
 //     timer = setTimeout(() => {
 //       timer = null
@@ -168,7 +168,6 @@
 // ------------------- 实现一个map和reduce函数 ---------------------
 // map
 // Array.prototype.myMap = function (fn, context) {
-//   console.log(this);
 //   const arr = Array.prototype.slice.call(this);
 //   const newList = [];
 //   arr.forEach((element, i) => {
@@ -232,10 +231,10 @@
 
 // ---------------- 大数相乘 --------------------
 // var multiply = function (num1, num2) {
+//   // 参数为字符串，返回字符串
 //   if (typeof num1 !== 'string' || typeof num2 !== 'string') {
 //     throw new Error('必须传字符串');
 //   }
-//   // 参数为字符串，返回字符串
 //   var result = '0';
 //   var i = num1.length - 1;
 //   while (i >= 0) {
@@ -252,7 +251,7 @@
 //     i--;
 //   }
 
-//   for (var j = 0; j < result.length - 1; j++) {
+//   for (var j = 0; j < result.length ; j++) {
 //     if (result[j] !== '0') {
 //       return result.slice(j);
 //     }
@@ -340,12 +339,12 @@
 //         before.slice(0, len % 3) +
 //         before
 //           .slice(len % 3)
-//           .match(/d{3}/g)
+//           .match(/\d{3}/g)
 //           .join(',') +
 //         after
 //       );
 //     } else {
-//       return before.match(/d{3}/g).join(',') + after;
+//       return before.match(/\d{3}/g).join(',') + after;
 //     }
 //   } else {
 //     return number;
@@ -401,3 +400,363 @@
 //   }, {});
 //   return result;
 // }
+
+// -------------------- 如何使用for...of遍历对象 --------------
+// 想要遍历对象，可以给对象添加一个Symbol.iterator属性，并指向一个迭代器即可
+// var obj = {
+//   a: 1,
+//   b: 2,
+//   c: 3,
+// };
+// obj[Symbol.iterator] = function* () {
+//   var keys = Object.keys(obj);
+//   for (var k of keys) {
+//     yield [k, obj[k]];
+//   }
+// };
+
+// for (var [k, v] of obj) {
+//   console.log(k, v);
+// }
+
+// --------------------- 函数柯里化实现 ------------------------
+// function curry(fn, arg) {
+//   const length = fn.length;   // 函数参数长度
+//   arg = arg || [];
+//   return function () {
+//     const params = [...arg, ...arguments];
+//     if (params.length >= length) {
+//       return fn.apply(this, params);
+//     } else {
+//       return curry(fn, params);
+//     }
+//   };
+// }
+
+// -------------------- 数组转成树 ----------------
+// function arrToTree(arr) {
+//   const map = {};
+//   const result = [];
+//   for (const value of arr) {
+//     map[value.id] = value;
+//   }
+//   for (var i = 0; i < arr.length; i++) {
+//     const pid = arr[i].pid;
+//     if (pid) {
+//       map[pid].children = map[pid].children || [];
+//       map[pid].children.push(arr[i]);
+//     } else {
+//       result.push(arr[i]);
+//     }
+//   }
+//   return result;
+// }
+
+// -------------------- 树转数组 -----------------------
+// function treeToArr(arr, result = []) {
+//   for (var i = 0; i < arr.length; i++) {
+//     const children = arr[i].children;
+//     if (children) {
+//       treeToArr(children, result);
+//       delete arr[i].children;
+//       result.push(arr[i]);
+//     } else {
+//       result.push(arr[i]);
+//     }
+//   }
+//   return result;
+// }
+
+// ------------------ 使用 setTimeout 实现 setInterval --------------
+// function myInterval(fn, wait) {
+//   let timer = null;
+//   function interval() {
+//     fn();
+//     timer = setTimeout(interval, wait);
+//   }
+//   timer = setTimeout(interval, wait);
+//   return {
+//     clear() {
+//       clearTimeout(timer);
+//     },
+//   };
+// }
+
+// ------------------- 实现一个发布订阅模式 --------------------
+// class EventCenter {
+//   constructor() {
+//     this.event = {};
+//   }
+
+//   subscribe(eventName, callback) {
+//     if (!this.event[eventName]) {
+//       this.event[eventName] = [callback];
+//     } else {
+//       this.event[eventName].push(callback);
+//     }
+//   }
+
+//   unSubscribe(eventName, callback) {
+//     if (!this.event[eventName] || !this.event[eventName].length) {
+//       throw new Error('not find event ' + eventName);
+//     } else {
+//       if (!callback) {
+//         delete this.events[eventName];
+//       } else {
+//         const index = this.event[eventName].findIndex((el) => el === callback);
+//         if (index === -1) {
+//           throw new Error('没有');
+//         } else {
+//           this.event[eventName].splice(index, 1);
+//         }
+//         if (this.event[eventName].length === 0) {
+//           delete this.events[eventName];
+//         }
+//       }
+//     }
+//   }
+
+//   dispatch(eventName, ...arg) {
+//     if (!this.event[eventName] || !this.event[eventName].length) {
+//       throw new Error();
+//     } else {
+//       this.event[eventName].forEach((cb) => {
+//         cb(...arg);
+//       });
+//     }
+//   }
+// }
+
+// -------------------- 实现斐波那契数列 --------------------
+// 递归方式
+// function fn(n) {
+//   if (n === 0) return 0;
+//   if (n === 1) return 1;
+//   return fn(n - 2) + fn(n - 1);
+// }
+
+// 非递归方式
+// function fn(n) {
+//   let pre1 = 0;
+//   let pre2 = 1;
+//   let current = 1;
+
+//   if (n === 2) return current;
+//   for (let i = 2; i < n; i++) {
+//     pre1 = pre2;
+//     pre2 = current;
+//     current = pre1 + pre2;
+//   }
+//   return current;
+// }
+
+// --------------- 冒泡排序 ---------------
+// function bubbleSort(arr) {
+//   const n = arr.length;
+//   for (let i = 0; i < n - 1; i++) {
+//     for (let j = 0; j < n - i - 1; j++) {
+//       if (arr[j] > arr[j + 1]) {
+//         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+//       }
+//     }
+//   }
+//   return arr;
+// }
+
+// ------------------- 选择排序 ----------------------
+// function selectionSort(arr) {
+//   const len = arr.length;
+//   for (var i = 0; i < len - 1; i++) {
+//     var minIndex = i;
+//     for (var j = i + 1; j < len; j++) {
+//       if (arr[minIndex] > arr[j]) {
+//         minIndex = j;
+//       }
+//     }
+//     [arr[minIndex], arr[i]] = [arr[i], arr[minIndex]];
+//   }
+//   return arr;
+// }
+
+// --------------------- 插入排序 -------------------
+// function insertionSort(arr) {
+//   const len = arr.length;
+//   for (var i = 1; i < len; i++) {
+//     let current = arr[i];
+//     let j = i - 1;
+//     while (j >= 0 && arr[j] > current) {
+//       arr[j + 1] = arr[j];
+//       j--;
+//     }
+//     arr[j + 1] = current;
+//   }
+//   return arr;
+// }
+
+// ---------------------- 快速排序 --------------------------
+// function quickSort(arr) {
+//   if (arr.length <= 1) {
+//     return arr;
+//   }
+//   let pivot = arr[0];
+//   let left = [];
+//   let right = [];
+//   for (var i = 1; i < arr.length; i++) {
+//     if (arr[i] < pivot) {
+//       left.push(arr[i]);
+//     } else {
+//       right.push(arr[i]);
+//     }
+//   }
+//   return quickSort(left).concat(pivot, quickSort(right));
+// }
+
+// --------------------- 希尔排序 ----------------------
+// function shellSort(arr) {
+//   const n = arr.length;
+//   for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+//     for (let i = gap; i < n; i++) {
+//       let temp = arr[i];
+//       let j = i;
+//       while (j >= gap && arr[j - gap] > temp) {
+//         arr[j] = arr[j - gap];
+//         j -= gap;
+//       }
+//       arr[j] = temp;
+//     }
+//   }
+//   return arr;
+// }
+
+// ------------------------ 归并排序 ----------------------
+// function mergeSort(arr) {
+//   if (arr.length <= 1) {
+//     return arr;
+//   }
+//   const middle = Math.floor(arr.length / 2);
+//   const left = arr.slice(0, middle);
+//   const right = arr.slice(middle);
+//   return merge(mergeSort(left), mergeSort(right));
+// }
+
+// function merge(left, right) {
+//   let result = [];
+//   let leftIndex = 0;
+//   let rightIndex = 0;
+//   while (leftIndex < left.length && rightIndex < right.length) {
+//     if (left[leftIndex] < right[rightIndex]) {
+//       result.push(left[leftIndex]);
+//       leftIndex++;
+//     } else {
+//       result.push(right[rightIndex]);
+//       rightIndex++;
+//     }
+//   }
+//   return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
+// }
+
+// ------------------------ 堆排序 ------------------------
+// function heapSort(arr) {
+//   const n = arr.length;
+//   for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+//     heapify(arr, n, i);
+//   }
+//   for (let i = n - 1; i > 0; i--) {
+//     [arr[0], arr[i]] = [arr[i], arr[0]];
+//     heapify(arr, i, 0);
+//   }
+//   return arr;
+// }
+
+// function heapify(arr, n, i) {
+//   let largest = i;
+//   const left = 2 * i + 1;
+//   const right = 2 * i + 2;
+//   if (left < n && arr[left] > arr[largest]) {
+//     largest = left;
+//   }
+//   if (right < n && arr[right] > arr[largest]) {
+//     largest = right;
+//   }
+//   if (largest !== i) {
+//     [arr[i], arr[largest]] = [arr[largest], arr[i]];
+//     heapify(arr, n, largest);
+//   }
+// }
+
+// ----------------------- 计数排序 -----------------------
+// function countingSort(arr) {
+//   const max = Math.max(...arr);
+//   const min = Math.min(...arr);
+//   const range = max - min + 1;
+//   const countArr = new Array(range).fill(0);
+//   const output = new Array(arr.length);
+
+//   for (let i = 0; i < arr.length; i++) {
+//     countArr[arr[i] - min]++;
+//   }
+//   for (let i = 1; i < range; i++) {
+//     countArr[i] += countArr[i - 1];
+//   }
+//   for (let i = arr.length - 1; i >= 0; i--) {
+//     output[countArr[arr[i] - min] - 1] = arr[i];
+//     countArr[arr[i] - min]--;
+//   }
+//   for (let i = 0; i < arr.length; i++) {
+//     arr[i] = output[i];
+//   }
+//   return arr;
+// }
+
+// ------------------------ 桶排序 -------------------------
+// function bucketSort(arr, bucketSize = 5) {
+//   if (arr.length === 0) {
+//     return arr;
+//   }
+//   const minValue = Math.min(...arr);
+//   const maxValue = Math.max(...arr);
+//   const bucketCount = Math.floor((maxValue - minValue) / bucketSize) + 1;
+
+//   const buckets = new Array(bucketCount);
+//   for (let i = 0; i < bucketCount; i++) {
+//     buckets[i] = [];
+//   }
+//   for (let i = 0; i < arr.length; i++) {
+//     const bucketIndex = Math.floor((arr[i] - minValue) / bucketSize);
+//     buckets[bucketIndex].push(arr[i]);
+//   }
+//   arr.length = 0;
+//   for (let i = 0; i < bucketCount; i++) {
+//     insertionSort(buckets[i]);
+//     arr.push(...buckets[i]);
+//   }
+//   return arr;
+// }
+
+// -------------------- 基数排序 --------------------
+// function radixSort(arr) {
+//   const maxDigit = getMaxDigit(arr);
+//   for (let digit = 0; digit < maxDigit; digit++) {
+//     const bucketList = Array.from({ length: 10 }, () => []);
+//     for (let i = 0; i < arr.length; i++) {
+//       const digitValue = getDigitValue(arr[i], digit);
+//       bucketList[digitValue].push(arr[i]);
+//     }
+//     arr = bucketList.flat();
+//   }
+//   return arr;
+// }
+
+// function getMaxDigit(arr) {
+//   let max = 0;
+//   for (let i = 0; i < arr.length; i++) {
+//     max = Math.max(max, arr[i].toString().length);
+//   }
+//   return max;
+// }
+
+// function getDigitValue(num, digit) {
+//   return Math.floor(Math.abs(num) / Math.pow(10, digit)) % 10;
+// }
+
+console.log(quickSort([34, 4, 56, 3, 2, 89, 58]));
