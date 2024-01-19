@@ -550,213 +550,171 @@
 //   return current;
 // }
 
-// --------------- 冒泡排序 ---------------
-// function bubbleSort(arr) {
-//   const n = arr.length;
-//   for (let i = 0; i < n - 1; i++) {
-//     for (let j = 0; j < n - i - 1; j++) {
-//       if (arr[j] > arr[j + 1]) {
-//         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+// ---------------------- 请求并发控制 ----------------
+// 实现一个并发请求函数concurrencyRequest(urls, maxNum)，要求如下：
+// • 要求最大并发数 maxNum
+// • 每当有一个请求返回，就留下一个空位，可以增加新的请求
+// • 所有请求完成后，结果按照 urls 里面的顺序依次打出（发送请求的函数可以直接使用fetch即可）
+// 并发请求函数
+// const concurrencyRequest = (urls, maxNum) => {
+//   return new Promise((resolve) => {
+//     if (urls.length === 0) {
+//       return resolve([]);
+//     }
+//     const results = [];
+//     let index = 0; // 下一个请求的下标
+//     // 发送请求
+//     async function request() {
+//       if (index === urls.length) return;
+//       const i = index; // 保存序号，使result和urls相对应
+//       try {
+//         const res = await fetch(urls[i]);
+//         // resp 加入到results
+//         results[i] = res;
+//       } catch (err) {
+//         // err 加入到results
+//         results[i] = err;
+//       } finally {
+//         index++;
+//         // 判断是否所有的请求都已完成
+//         if (index === urls.length) {
+//           console.log('完成了');
+//           resolve(results);
+//         } else {
+//           request();
+//         }
 //       }
 //     }
-//   }
-//   return arr;
+
+//     // maxNum和urls.length取最小进行调用
+//     const times = Math.min(maxNum, urls.length);
+//     for (let i = 0; i < times; i++) {
+//       request();
+//     }
+//   });
+// };
+
+// --------------- 实现lazy链式调用: person.eat().sleep(2).eat() ------------
+// function Person() {
+//   this.queue = [];
+//   this.lock = false;
+//   this.eat = function () {
+//     this.queue.push(
+//       () =>
+//         new Promise((resolve) => {
+//           console.log('eat');
+//           resolve();
+//         })
+//     );
+//     return this;
+//   };
+//   this.sleep = function (wait) {
+//     this.queue.push(
+//       () =>
+//         new Promise((resolve) => {
+//           setTimeout(() => {
+//             console.log('sleep');
+//             resolve('');
+//           }, wait * 1000);
+//         })
+//     );
+//     return this;
+//   };
+//   this.run = async function () {
+//     if (this.queue.length && !this.lock) {
+//       this.lock = true;
+//       const task = this.queue.shift();
+//       await task();
+//       this.lock = false;
+//       this.run();
+//     }
+//   };
 // }
 
-// ------------------- 选择排序 ----------------------
-// function selectionSort(arr) {
-//   const len = arr.length;
-//   for (var i = 0; i < len - 1; i++) {
-//     var minIndex = i;
-//     for (var j = i + 1; j < len; j++) {
-//       if (arr[minIndex] > arr[j]) {
-//         minIndex = j;
+// ----------------- lazy-load实现 ---------------------------
+// 首先将页面上的图片的 src 属性设为 loading.gif，而图片的真实路径则设置在 data-src 属性中，页面滚动的时候计算图片的位置与滚动的位置，当图片出现在浏览器视口内时，将图片的 src 属性设置为 data-src 的值，这样，就可以实现延迟加载。
+// <img src="images/loading.gif" data-src="images/1.png"></img>
+// function lazyload() {
+//   var images = document.getElementsByTagName('img');
+//   var len = images.length;
+//   var n = 0; //存储图片加载到的位置，避免每次都从第一张图片开始遍历
+//   return function () {
+//     var seeHeight = document.documentElement.clientHeight;
+//     var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+//     for (var i = n; i < len; i++) {
+//       if (images[i].offsetTop < seeHeight + scrollTop) {
+//         if (images[i].getAttribute('src') === 'images/loading.gif') {
+//           images[i].src = images[i].getAttribute('data-src');
+//         }
+//         n = n + 1;
 //       }
 //     }
-//     [arr[minIndex], arr[i]] = [arr[i], arr[minIndex]];
-//   }
-//   return arr;
+//   };
 // }
+// var loadImages = lazyload();
+// loadImages(); //初始化首页的页面图片
+// window.addEventListener('scroll', loadImages, false);
 
-// --------------------- 插入排序 -------------------
-// function insertionSort(arr) {
-//   const len = arr.length;
-//   for (var i = 1; i < len; i++) {
-//     let current = arr[i];
-//     let j = i - 1;
-//     while (j >= 0 && arr[j] > current) {
-//       arr[j + 1] = arr[j];
-//       j--;
+// --------------------- 实现一个只执行一次的函数 -----------------------
+// function once(fn) {
+//   let called = false;
+//   let result = null;
+//   return function () {
+//     if (called) {
+//       return result;
 //     }
-//     arr[j + 1] = current;
-//   }
-//   return arr;
+//     called = true;
+//     result = fn.apply(this, arguments);
+//     return result;
+//   };
 // }
 
-// ---------------------- 快速排序 --------------------------
-// function quickSort(arr) {
-//   if (arr.length <= 1) {
-//     return arr;
+// ------------------ LRU 算法实现 --------------------
+// class LRUCahe {
+//   constructor(capacity) {
+//     this.cache = new Map();
+//     this.capacity = capacity;
 //   }
-//   let pivot = arr[0];
-//   let left = [];
-//   let right = [];
-//   for (var i = 1; i < arr.length; i++) {
-//     if (arr[i] < pivot) {
-//       left.push(arr[i]);
-//     } else {
-//       right.push(arr[i]);
+//   get(key){
+//     if(this.cache.has(key)){
+//       const value = this.cache.get(key);
+//       this.cache.delete(key);
+//       this.cache.set(key, value);
+//       return value
 //     }
+//     return undefined
 //   }
-//   return quickSort(left).concat(pivot, quickSort(right));
-// }
-
-// --------------------- 希尔排序 ----------------------
-// function shellSort(arr) {
-//   const n = arr.length;
-//   for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
-//     for (let i = gap; i < n; i++) {
-//       let temp = arr[i];
-//       let j = i;
-//       while (j >= gap && arr[j - gap] > temp) {
-//         arr[j] = arr[j - gap];
-//         j -= gap;
-//       }
-//       arr[j] = temp;
+//   set(key,value){
+//     if(this.cache.has(key)){
+//       this.cache.delete(key);
+//     }else if(this.cache.size >= this.capacity){
+//       this.cache.delete(this.cache.keys().next().value);
 //     }
-//   }
-//   return arr;
-// }
-
-// ------------------------ 归并排序 ----------------------
-// function mergeSort(arr) {
-//   if (arr.length <= 1) {
-//     return arr;
-//   }
-//   const middle = Math.floor(arr.length / 2);
-//   const left = arr.slice(0, middle);
-//   const right = arr.slice(middle);
-//   return merge(mergeSort(left), mergeSort(right));
-// }
-
-// function merge(left, right) {
-//   let result = [];
-//   let leftIndex = 0;
-//   let rightIndex = 0;
-//   while (leftIndex < left.length && rightIndex < right.length) {
-//     if (left[leftIndex] < right[rightIndex]) {
-//       result.push(left[leftIndex]);
-//       leftIndex++;
-//     } else {
-//       result.push(right[rightIndex]);
-//       rightIndex++;
-//     }
-//   }
-//   return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
-// }
-
-// ------------------------ 堆排序 ------------------------
-// function heapSort(arr) {
-//   const n = arr.length;
-//   for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-//     heapify(arr, n, i);
-//   }
-//   for (let i = n - 1; i > 0; i--) {
-//     [arr[0], arr[i]] = [arr[i], arr[0]];
-//     heapify(arr, i, 0);
-//   }
-//   return arr;
-// }
-
-// function heapify(arr, n, i) {
-//   let largest = i;
-//   const left = 2 * i + 1;
-//   const right = 2 * i + 2;
-//   if (left < n && arr[left] > arr[largest]) {
-//     largest = left;
-//   }
-//   if (right < n && arr[right] > arr[largest]) {
-//     largest = right;
-//   }
-//   if (largest !== i) {
-//     [arr[i], arr[largest]] = [arr[largest], arr[i]];
-//     heapify(arr, n, largest);
+//     this.cache.set(key, value);
 //   }
 // }
 
-// ----------------------- 计数排序 -----------------------
-// function countingSort(arr) {
-//   const max = Math.max(...arr);
-//   const min = Math.min(...arr);
-//   const range = max - min + 1;
-//   const countArr = new Array(range).fill(0);
-//   const output = new Array(arr.length);
+const obj = {
+  name: 'John',
+  age: 30,
+};
 
-//   for (let i = 0; i < arr.length; i++) {
-//     countArr[arr[i] - min]++;
-//   }
-//   for (let i = 1; i < range; i++) {
-//     countArr[i] += countArr[i - 1];
-//   }
-//   for (let i = arr.length - 1; i >= 0; i--) {
-//     output[countArr[arr[i] - min] - 1] = arr[i];
-//     countArr[arr[i] - min]--;
-//   }
-//   for (let i = 0; i < arr.length; i++) {
-//     arr[i] = output[i];
-//   }
-//   return arr;
-// }
+const proxy = new Proxy(obj, {
+  get(target, property) {
+    console.log(target);
+    console.log(`Getting ${property}`);
+    return target[property];
+  },
+  set(target, property, value) {
+    console.log(`Setting ${property} to ${value}`);
+    target[property] = value;
+  },
+});
 
-// ------------------------ 桶排序 -------------------------
-// function bucketSort(arr, bucketSize = 5) {
-//   if (arr.length === 0) {
-//     return arr;
-//   }
-//   const minValue = Math.min(...arr);
-//   const maxValue = Math.max(...arr);
-//   const bucketCount = Math.floor((maxValue - minValue) / bucketSize) + 1;
+console.log(proxy.name); // Getting name, John
+proxy.name = 'Alice'; // Setting name to Alice
+console.log(proxy.name); // Getting name, Alice
 
-//   const buckets = new Array(bucketCount);
-//   for (let i = 0; i < bucketCount; i++) {
-//     buckets[i] = [];
-//   }
-//   for (let i = 0; i < arr.length; i++) {
-//     const bucketIndex = Math.floor((arr[i] - minValue) / bucketSize);
-//     buckets[bucketIndex].push(arr[i]);
-//   }
-//   arr.length = 0;
-//   for (let i = 0; i < bucketCount; i++) {
-//     insertionSort(buckets[i]);
-//     arr.push(...buckets[i]);
-//   }
-//   return arr;
-// }
-
-// -------------------- 基数排序 --------------------
-// function radixSort(arr) {
-//   const maxDigit = getMaxDigit(arr);
-//   for (let digit = 0; digit < maxDigit; digit++) {
-//     const bucketList = Array.from({ length: 10 }, () => []);
-//     for (let i = 0; i < arr.length; i++) {
-//       const digitValue = getDigitValue(arr[i], digit);
-//       bucketList[digitValue].push(arr[i]);
-//     }
-//     arr = bucketList.flat();
-//   }
-//   return arr;
-// }
-
-// function getMaxDigit(arr) {
-//   let max = 0;
-//   for (let i = 0; i < arr.length; i++) {
-//     max = Math.max(max, arr[i].toString().length);
-//   }
-//   return max;
-// }
-
-// function getDigitValue(num, digit) {
-//   return Math.floor(Math.abs(num) / Math.pow(10, digit)) % 10;
-// }
-
-console.log(quickSort([34, 4, 56, 3, 2, 89, 58]));
+console.log(proxy.age); // Getting age, 30
+proxy.age = 40; // Setting age to 40
+console.log(proxy.age); // Getting age, 40
