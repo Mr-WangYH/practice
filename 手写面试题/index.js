@@ -1,8 +1,6 @@
 // -------------- 手写Object.create --------------
 // function create(obj) {
-//   function Fun(){
-
-//   }
+//   function Fun(){  }
 //   Fun.prototype = obj;
 //   Fun.prototype.constructor = Fun;
 //   return new Fun()
@@ -139,7 +137,7 @@
 //   }
 //   const res = Object(target);
 //   source.forEach((obj) => {
-//     if (!obj !== null) {
+//     if (obj !== null) {
 //       for (let key in obj) {
 //         if (obj.hasOwnProperty(key)) {
 //           res[key] = obj[key];
